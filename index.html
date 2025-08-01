@@ -270,6 +270,7 @@
             setTimeout(() => pigeon.remove(), 5000);
         }
         
+        // --- UPDATED GEMINI API FUNCTION ---
         async function embellishMessage() {
             const originalText = messageInput.value.trim();
             if (!originalText) {
@@ -293,8 +294,17 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
+                // *** FIX STARTS HERE: Improved Error Handling ***
                 const result = await response.json();
+                
+                if (!response.ok) {
+                    // If the response is not OK (e.g., 400 or 500 error), show the error from the API
+                    const errorDetails = result.error ? result.error.message : 'An unknown error occurred.';
+                    console.error("Gemini API Error:", errorDetails);
+                    alert(`Could not embellish message. Reason: ${errorDetails}`);
+                    return; // Stop the function here
+                }
                 
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
@@ -302,12 +312,14 @@
                     const embellishedText = result.candidates[0].content.parts[0].text;
                     messageInput.value = embellishedText.trim();
                 } else {
-                    alert("The muses are silent. Could not embellish the message.");
+                    // This handles cases where the API call was successful but returned no content
+                    alert("The muses are silent. The API returned an empty response.");
                 }
+                // *** FIX ENDS HERE ***
 
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
-                alert("An error occurred while communicating with the poet pigeons.");
+                alert("An error occurred while communicating with the poet pigeons. Check the console for details.");
             } finally {
                 embellishButton.disabled = false;
                 embellishButton.textContent = "Embellish with Poetry ✨";
