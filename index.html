@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pigeon Post - Multi-Device</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap');
+        
+        body {
+            font-family: 'IM Fell English', serif;
+            background-color: #f4f1ea;
+            color: #4a4a4a;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fffaf0;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #8B4513;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 10px;
+        }
+
+        .user-id-section {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #e8e3d8;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-id-section code {
+            font-family: monospace;
+            background: #fff;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        .compose-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input, textarea {
+            font-family: 'IM Fell English', serif;
+            font-size: 1.2em;
+            width: 100%;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            box-sizing: border-box;
+            background-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #8B4513;
+        }
+        
+        /* Container for buttons */
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px; /* Space between buttons */
+        }
+
+        button {
+            font-family: 'IM Fell English', serif;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        
+        /* Style for the new Gemini button */
+        #embellish-button {
+            background-color: #3b5998; /* A nice blue */
+        }
+        #embellish-button:hover {
+            background-color: #2d4373;
+        }
+
+        button:hover {
+            background-color: #A0522D; /* Sienna */
+        }
+        button:disabled {
+            background-color: #c5a892;
+            cursor: not-allowed;
+        }
+
+        .inbox-section {
+            margin-top: 30px;
+        }
+
+        h2 {
+            color: #8B4513;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        #inbox-messages {
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        
+        .error-message {
+            background-color: #ffdddd;
+            border: 1px solid #d93025;
+            color: #d93025;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .message {
+            background-color: #fdf5e6;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-left: 5px solid #A0522D;
+            margin-bottom: 10px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .message .from {
+            font-style: italic;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .pigeon {
+            position: fixed;
+            font-size: 50px;
+            top: 50%;
+            left: -100px;
+            animation: fly-pigeon 5s linear forwards;
+            z-index: 100;
+        }
+
+        @keyframes fly-pigeon {
+            0% { left: -100px; transform: translateY(0) scaleX(-1); }
+            20% { transform: translateY(-50px) scaleX(-1); }
+            40% { transform: translateY(20px) scaleX(-1); }
+            100% { left: 110vw; transform: translateY(-100px) scaleX(-1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pigeon Post</h1>
+        
+        <div id="config-error" class="error-message" style="display: none;">
+            <b>Demo Mode Active:</b> To message other devices, paste your personal Firebase configuration into the code.
+        </div>
+
+        <div class="user-id-section">
+            Your Pigeon Loft ID is: <code id="my-id" title="Click to copy">Loading...</code><br>
+            <small>Share this ID with a friend so they can send you a pigeon!</small>
+        </div>
+
+        <div class="compose-section">
+            <input type="text" id="recipient-id" placeholder="Enter recipient's Loft ID...">
+            <textarea id="message-input" placeholder="Write your message on this scroll..."></textarea>
+            <div class="button-container">
+                <button id="embellish-button">Embellish with Poetry ✨</button>
+                <button id="send-button">Send by Pigeon</button>
+            </div>
+        </div>
+
+        <div class="inbox-section">
+            <h2>Inbox</h2>
+            <div id="inbox-messages">
+                <!-- Arrived messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Import the real Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // =================================================================
+        // YOUR UNIQUE FIREBASE CONFIGURATION IS NOW HERE
+        // =================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtOwfXBOy-WS00xZxNUG_Ck3RHUucV4YQ",
+            authDomain: "pigeon-post-app-afe95.firebaseapp.com",
+            projectId: "pigeon-post-app-afe95",
+            storageBucket: "pigeon-post-app-afe95.appspot.com",
+            messagingSenderId: "311575508155",
+            appId: "1:311575508155:web:eda99abef8ffd9a3df259e",
+            measurementId: "G-B5KEE5M2PD"
+        };
+        // =================================================================
+
+        const configErrorDiv = document.getElementById('config-error');
+        let db;
+        let isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+
+        if (isFirebaseConfigured) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } else {
+            configErrorDiv.style.display = 'block';
+            console.warn("Firebase is not configured. Running in demo mode using localStorage.");
+        }
+
+        // --- App Logic ---
+        const myIdElement = document.getElementById('my-id');
+        const recipientIdInput = document.getElementById('recipient-id');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const embellishButton = document.getElementById('embellish-button');
+        const inboxMessages = document.getElementById('inbox-messages');
+        
+        let myId = localStorage.getItem('myPigeonId');
+        if (!myId) {
+            myId = 'loft-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('myPigeonId', myId);
+        }
+        myIdElement.textContent = myId;
+
+        myIdElement.onclick = () => {
+            const textArea = document.createElement('textarea');
+            textArea.value = myId;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('Copied your Loft ID!');
+            } catch (err) {
+                alert('Failed to copy ID.');
+            }
+            document.body.removeChild(textArea);
+        };
+
+        function releaseThePigeon() {
+            const pigeon = document.createElement('div');
+            pigeon.textContent = '🕊️';
+            pigeon.className = 'pigeon';
+            document.body.appendChild(pigeon);
+            setTimeout(() => pigeon.remove(), 5000);
+        }
+        
+        async function embellishMessage() {
+            const originalText = messageInput.value.trim();
+            if (!originalText) {
+                alert("Please write a message first.");
+                return;
+            }
+
+            embellishButton.disabled = true;
+            embellishButton.textContent = "Embellishing...";
+
+            const prompt = `Rewrite the following message in a poetic, old-fashioned style, as if it were being sent by a carrier pigeon. Keep the core meaning intact. Message: "${originalText}"`;
+            
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Canvas will provide this
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const embellishedText = result.candidates[0].content.parts[0].text;
+                    messageInput.value = embellishedText.trim();
+                } else {
+                    alert("The muses are silent. Could not embellish the message.");
+                }
+
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                alert("An error occurred while communicating with the poet pigeons.");
+            } finally {
+                embellishButton.disabled = false;
+                embellishButton.textContent = "Embellish with Poetry ✨";
+            }
+        }
+
+
+        async function sendMessage() {
+            const recipientId = recipientIdInput.value.trim();
+            const messageText = messageInput.value.trim();
+
+            if (!recipientId || !messageText) {
+                alert("Please provide a recipient ID and a message.");
+                return;
+            }
+
+            sendButton.disabled = true;
+            sendButton.textContent = "Sending...";
+            releaseThePigeon();
+
+            const randomDelay = Math.random() * 20000 + 10000; // 10-30 seconds
+            const arrivalTime = Date.now() + randomDelay;
+
+            const message = {
+                from: myId,
+                text: messageText,
+                arrival: arrivalTime,
+            };
+            
+            if (isFirebaseConfigured) {
+                message.createdAt = serverTimestamp();
+                try {
+                    const recipientInboxRef = collection(db, "lofts", recipientId, "messages");
+                    await addDoc(recipientInboxRef, message);
+                } catch (error) {
+                    console.error("Error sending message: ", error);
+                    alert("Could not send message. Is the Loft ID correct?");
+                }
+            } else {
+                const recipientInbox = JSON.parse(localStorage.getItem(recipientId) || '[]');
+                recipientInbox.push({ ...message, id: Date.now().toString() });
+                localStorage.setItem(recipientId, JSON.stringify(recipientInbox));
+            }
+
+            messageInput.value = '';
+            recipientIdInput.value = '';
+            sendButton.disabled = false;
+            sendButton.textContent = "Send by Pigeon";
+        }
+
+        function listenForMessages() {
+            if (isFirebaseConfigured) {
+                const myInboxRef = collection(db, "lofts", myId, "messages");
+                const q = query(myInboxRef);
+
+                onSnapshot(q, (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            const message = change.doc.data();
+                            const messageId = change.doc.id;
+                            scheduleDisplay(message, messageId);
+                        }
+                    });
+                });
+            } else {
+                setInterval(() => {
+                    const myInbox = JSON.parse(localStorage.getItem(myId) || '[]');
+                    myInbox.forEach(message => {
+                        scheduleDisplay(message, message.id);
+                    });
+                }, 2000);
+            }
+        }
+
+        function scheduleDisplay(message, messageId) {
+            const now = Date.now();
+            if (document.getElementById(messageId)) return;
+
+            if (now >= message.arrival) {
+                displayMessage(message, messageId);
+            } else {
+                const displayDelay = message.arrival - now;
+                setTimeout(() => {
+                    displayMessage(message, messageId);
+                }, displayDelay);
+            }
+        }
+
+        function displayMessage(message, messageId) {
+            if (document.getElementById(messageId)) return;
+
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.id = messageId;
+            
+            const fromElement = document.createElement('div');
+            fromElement.className = 'from';
+            fromElement.textContent = `From: ${message.from}`;
+
+            const textElement = document.createElement('div');
+            textElement.textContent = message.text;
+
+            messageElement.appendChild(fromElement);
+            messageElement.appendChild(textElement);
+            inboxMessages.prepend(messageElement);
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        embellishButton.addEventListener('click', embellishMessage);
+        
+        listenForMessages();
+
+    </script>
+</body>
+</html>
