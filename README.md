@@ -45,16 +45,19 @@ Simply open the `index.html` file in any modern web browser. No complex commands
 ### Project Documentation
 For Software:
 
-# Screenshots (Add at least 3)
-![Screenshot1]Screenshot 2025-08-02 202850.png
+# Screenshots 
+https://github.com/benjyou2004/pigeonapp/blob/main/Screenshot%202025-08-02%20202850.png
 *The main user interface, showing the elegant message scroll and the ominous "Send by Pigeon" button.*
 
-https://github.com/benjyou2004/pigeonapp/blob/main/Screenshot%202025-08-02%20202939.png*A demonstration of our AI-powered "Embellish with Poetry" feature, turning a boring message into a literary masterpiece.*
+https://github.com/benjyou2004/pigeonapp/blob/main/Screenshot%202025-08-02%20202939.png
+*A demonstration of our AI-powered "Embellish with Poetry" feature, turning a boring message into a literary masterpiece.*
 
-https://github.com/benjyou2004/pigeonapp/blob/main/Screenshot%202025-08-02%20202939.png*The thrilling conclusion! A message successfully arrives in the inbox after its long and perilous journey.*
+https://github.com/benjyou2004/pigeonapp/blob/main/Screenshot%202025-08-02%20203015.png
+*The thrilling conclusion! A message successfully arrives in the inbox after its long and perilous journey.*
 
 # Diagrams
-https://github.com/benjyou2004/pigeonapp/blob/main/flowchart.png*Our highly complex architecture: A user writes a message, an AI makes it fancy, it gets sent to the Firebase cloud nest, a pigeon grabs it, flies around for a bit, then drops it off on the other device. Simple.*
+https://github.com/benjyou2004/pigeonapp/blob/main/flowchart.png
+*Our highly complex architecture: A user writes a message, an AI makes it fancy, it gets sent to the Firebase cloud nest, a pigeon grabs it, flies around for a bit, then drops it off on the other device. Simple.*
 
 ### Project Demo
 # Video
@@ -62,7 +65,7 @@ https://youtu.be/5FINjz5OS3E
 *This video demonstrates the full, end-to-end user journey of sending a message from one device, embellishing it with the Gemini API, and watching it arrive on a second device after a glorious, useless delay.*
 
 ## Team Contributions
-- **[Benjamin Paul]**: 
+- **Benjamin Paul**: 
   - Conceived and designed the entire anti-user experience.
   - Developed the frontend UI with HTML & CSS.
   - Engineered the core application logic and pigeon animation in JavaScript.
