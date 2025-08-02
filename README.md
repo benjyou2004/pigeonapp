@@ -45,8 +45,9 @@ Simply open the `index.html` file in any modern web browser. No complex commands
 ### Project Documentation
 For Software:
 
-# Screenshots
-https://github.com/benjyou2004/pigeonapp/blob/main/Screenshot%202025-08-02%20202850.png*The main user interface, showing the elegant message scroll and the ominous "Send by Pigeon" button.*
+# Screenshots (Add at least 3)
+![Screenshot1]Screenshot 2025-08-02 202850.png
+*The main user interface, showing the elegant message scroll and the ominous "Send by Pigeon" button.*
 
 https://github.com/benjyou2004/pigeonapp/blob/main/Screenshot%202025-08-02%20202939.png*A demonstration of our AI-powered "Embellish with Poetry" feature, turning a boring message into a literary masterpiece.*
 
