@@ -197,12 +197,10 @@
         <div class="inbox-section">
             <h2>Inbox</h2>
             <div id="inbox-messages">
-                <!-- Arrived messages will appear here -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Import the real Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
@@ -270,7 +268,6 @@
             setTimeout(() => pigeon.remove(), 5000);
         }
         
-        // --- UPDATED GEMINI API FUNCTION ---
         async function embellishMessage() {
             const originalText = messageInput.value.trim();
             if (!originalText) {
@@ -284,9 +281,11 @@
             const prompt = `Rewrite the following message in a poetic, old-fashioned style, as if it were being sent by a carrier pigeon. Keep the core meaning intact. Message: "${originalText}"`;
             
             try {
+                // *** YOUR GEMINI API KEY IS NOW HERE ***
+                const apiKey = "AIzaSyD8nJzudVc8AwwNN7CillKNWsn4NdfPMwM";
+                
                 let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = ""; // Canvas will provide this
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(apiUrl, {
@@ -294,28 +293,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
-                // *** FIX STARTS HERE: Improved Error Handling ***
+                
                 const result = await response.json();
                 
                 if (!response.ok) {
-                    // If the response is not OK (e.g., 400 or 500 error), show the error from the API
                     const errorDetails = result.error ? result.error.message : 'An unknown error occurred.';
                     console.error("Gemini API Error:", errorDetails);
                     alert(`Could not embellish message. Reason: ${errorDetails}`);
-                    return; // Stop the function here
+                    return;
                 }
                 
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
+                if (result.candidates && result.candidates[0]?.content?.parts[0]) {
                     const embellishedText = result.candidates[0].content.parts[0].text;
                     messageInput.value = embellishedText.trim();
                 } else {
-                    // This handles cases where the API call was successful but returned no content
                     alert("The muses are silent. The API returned an empty response.");
                 }
-                // *** FIX ENDS HERE ***
 
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
