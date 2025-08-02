@@ -45,7 +45,7 @@ Simply open the `index.html` file in any modern web browser. No complex commands
 ### Project Documentation
 For Software:
 
-# Screenshots (Add at least 3)
+# Screenshots 
 ![Screenshot1]Screenshot 2025-08-02 202850.png
 *The main user interface, showing the elegant message scroll and the ominous "Send by Pigeon" button.*
 
